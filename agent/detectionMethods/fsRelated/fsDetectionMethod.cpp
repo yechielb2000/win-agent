@@ -13,7 +13,6 @@ std::string fsDetectionMethod::loadFile(const std::string &filepath) {
         NULL
     );
 
-
     if (hFile == INVALID_HANDLE_VALUE) {
         throw "Unable to open file: " + filepath;
     }

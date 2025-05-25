@@ -15,6 +15,8 @@ add_executable(WinAgent agent/agent.cpp
         agent/detectionMethods/fsRelated/basicComparison.hpp
         agent/detectionMethods/fsRelated/fsDetectionMethod.cpp
         agent/detectionMethods/fsRelated/fsDetectionMethod.hpp
+        agent/logger/logger.cpp
+        agent/logger/logger.hpp
 )
 
 target_link_libraries(WinAgent bcrypt)
