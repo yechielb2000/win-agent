@@ -2,7 +2,7 @@
 #define CONFIGFILE_HPP
 #include <string>
 #include <vector>
-#include "../common/processInfo.hpp"
+#include "../commonHeaders/processInfo.hpp"
 
 struct configFile {
 };

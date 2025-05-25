@@ -1,7 +1,7 @@
 #include <iostream>
 #include <windows.h>
 #include <vector>
-#include "common/processInfo.hpp"
+#include "commonHeaders/processInfo.hpp"
 #include "configFileSyner/configFile.hpp"
 
 int main() {

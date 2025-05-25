@@ -3,7 +3,7 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
-#include "../common/processInfo.hpp"
+#include "../commonHeaders/processInfo.hpp"
 
 // TODO: maybe split to load file and parse file.
 std::vector<ProcessInfo> loadConfigFile(const std::string &filename) {

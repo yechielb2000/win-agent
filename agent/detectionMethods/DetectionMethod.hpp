@@ -2,7 +2,7 @@
 #define DETECTIONMETHOD_HPP
 #include <vector>
 
-#include "../common/processInfo.hpp"
+#include "../commonHeaders/processInfo.hpp"
 
 class DetectionMethod {
     std::vector<ProcessInfo> &processList;
