@@ -15,7 +15,7 @@ protected:
 public:
     explicit DetectionMethod(const std::vector<ProcessInfo> &processList);
 
-    void warn(const ProcessInfo &processInfo);
+    void warn(const ProcessInfo &processInfo) const;
 };
 
 

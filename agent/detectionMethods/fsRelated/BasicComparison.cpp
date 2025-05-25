@@ -7,7 +7,7 @@
 
 #define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
 
-void BasicComparison::runDetection() {
+void BasicComparison::runDetection() const {
     for (ProcessInfo processInfo: this->processList) {
         std::string fileBuffer = this->loadFile(processInfo.path);
         if (isSHA256Matched(processInfo, fileBuffer)) {
