@@ -6,4 +6,8 @@ set(CMAKE_CXX_STANDARD 20)
 add_executable(WinAgent agent/agent.cpp
         agent/detectionMethods/detectionMethod.cpp
         agent/detectionMethods/detectionMethod.hpp
+        agent/configFileSyner/configFile.cpp
+        agent/configFileSyner/configFile.hpp
+        agent/configFileSyner/syncer.cpp
+        agent/configFileSyner/syncer.hpp
 )
