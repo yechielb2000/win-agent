@@ -86,36 +86,20 @@ VOID WINAPI WinAgentService(DWORD argc, LPTSTR *argv) {
 
     ZeroMemory(&g_ServiceStatus, sizeof (g_ServiceStatus));
     g_ServiceStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
-    g_ServiceStatus.dwControlsAccepted = 0;
-    g_ServiceStatus.dwCurrentState = SERVICE_START_PENDING;
-    g_ServiceStatus.dwWin32ExitCode = 0;
     g_ServiceStatus.dwServiceSpecificExitCode = 0;
-    g_ServiceStatus.dwCheckPoint = 0;
-
-    if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE) {
-        OutputDebugStringA("Failed to update service status");
-        return;
-    }
+    g_ServiceStatus.dwControlsAccepted = 0;
+    updateServiceStatus(SERVICE_START_PENDING, 0, 1);
 
     g_ServiceStopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
     if (g_ServiceStopEvent == NULL) {
         g_ServiceStatus.dwControlsAccepted = 0;
-        g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
-        g_ServiceStatus.dwWin32ExitCode = GetLastError();
-        g_ServiceStatus.dwCheckPoint = 1;
-
+        updateServiceStatus(SERVICE_STOPPED, GetLastError(), 1);
         return;
     }
 
     g_ServiceStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
-    g_ServiceStatus.dwCurrentState = SERVICE_RUNNING;
-    g_ServiceStatus.dwWin32ExitCode = 0;
-    g_ServiceStatus.dwCheckPoint = 0;
+    updateServiceStatus(SERVICE_RUNNING, 0, 0);
 
-    if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE) {
-        OutputDebugStringA("Failed to update service status");
-        return;
-    }
 
     const HANDLE winAgentThreadHandle = CreateThread(
         NULL,
@@ -137,22 +121,14 @@ VOID WINAPI WinAgentService(DWORD argc, LPTSTR *argv) {
 
     const HANDLE handles[] = {fileListenerThreadHandle, winAgentThreadHandle};
 
-    WaitForSingleObject(winAgentThreadHandle, INFINITE);
     WaitForMultipleObjects(2, handles, TRUE, INFINITE);
 
     CloseHandle(g_ServiceStopEvent);
     CloseHandle(winAgentThreadHandle);
     CloseHandle(fileListenerThreadHandle);
-    CloseHandle(g_ServiceStopEvent);
 
     g_ServiceStatus.dwControlsAccepted = 0;
-    g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
-    g_ServiceStatus.dwWin32ExitCode = 0;
-    g_ServiceStatus.dwCheckPoint = 3;
-
-    if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE) {
-        OutputDebugStringA("Failed to update service status");
-    }
+    updateServiceStatus(SERVICE_STOPPED, 0, 0);
 }
 
 
@@ -190,4 +166,13 @@ long updateProcessList() {
         return ERROR_FILE_NOT_FOUND;
     }
     return 0;
+}
+
+void updateServiceStatus(const DWORD dwCurrentState, const DWORD dwWin32ExitCode, const DWORD dwCheckPoint) {
+    g_ServiceStatus.dwCurrentState = dwCurrentState;
+    g_ServiceStatus.dwWin32ExitCode = dwWin32ExitCode;
+    g_ServiceStatus.dwCheckPoint = dwCheckPoint;
+    if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE) {
+        OutputDebugStringA("Failed to update service status");
+    }
 }

@@ -27,4 +27,6 @@ HANDLE ConfigFileChangeListener(const char *configFilePath);
 
 long updateProcessList();
 
+void updateServiceStatus(DWORD dwCurrentState, DWORD dwWin32ExitCode, DWORD dwCheckPoint);
+
 #endif
