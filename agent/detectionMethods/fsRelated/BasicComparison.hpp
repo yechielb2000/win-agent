@@ -5,7 +5,11 @@
 
 class BasicComparison : DetectionMethod {
 public:
-    bool isHashMatched(const ProcessInfo &processInfo);
+    explicit BasicComparison(const std::vector<ProcessInfo> &processList);
+
+    bool isHashMatched(const ProcessInfo &processInfo, char fileBuffer);
+
+    void runDetection();
 };
 
 
