@@ -5,7 +5,7 @@
 #include <sstream>
 #include "../common/processInfo.hpp"
 
-
+// TODO: maybe split to load file and parse file.
 std::vector<ProcessInfo> loadConfigFile(const std::string &filename) {
     std::vector<ProcessInfo> processList;
 
