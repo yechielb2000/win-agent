@@ -3,12 +3,8 @@
 
 #include "../DetectionMethod.hpp"
 
-class basicComparison : DetectionMethod {
+class BasicComparison : DetectionMethod {
 public:
-    bool isNameMatched(const ProcessInfo &processInfo);
-
-    bool isPathMatched(const ProcessInfo &processInfo);
-
     bool isHashMatched(const ProcessInfo &processInfo);
 };
 

@@ -10,9 +10,11 @@ class DetectionMethod {
 public:
     DetectionMethod();
 
-    explicit DetectionMethod(std::vector<ProcessInfo> &processList);
+    explicit DetectionMethod(const std::vector<ProcessInfo> &processList);
 
     void warn(const ProcessInfo &processInfo);
+
+    void detect();
 };
 
 

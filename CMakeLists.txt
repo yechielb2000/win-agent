@@ -13,5 +13,6 @@ add_executable(WinAgent agent/agent.cpp
         agent/commonHeaders/processInfo.hpp
         agent/detectionMethods/fsRelated/basicComparison.cpp
         agent/detectionMethods/fsRelated/basicComparison.hpp
-        agent/detectionMethods/fsRelated/walk.cpp
+        agent/detectionMethods/fsRelated/fsDetectionMethod.cpp
+        agent/detectionMethods/fsRelated/fsDetectionMethod.hpp
 )
