@@ -26,8 +26,13 @@ bool BasicComparison::isSHA256Matched(const ProcessInfo &processInfo, std::strin
     if (!NT_SUCCESS(status)) {
         return false;
     }
-    status = BCryptGetProperty(hAlg, BCRYPT_OBJECT_LENGTH, reinterpret_cast<PBYTE>(&cbHashObject), sizeof(DWORD),
-                               &cbData, 0);
+    status = BCryptGetProperty(
+        hAlg,
+        BCRYPT_OBJECT_LENGTH,
+        reinterpret_cast<PBYTE>(&cbHashObject), sizeof(DWORD),
+        &cbData,
+        0
+    );
     if (!NT_SUCCESS(status)) {
         return false;
     }
@@ -35,7 +40,14 @@ bool BasicComparison::isSHA256Matched(const ProcessInfo &processInfo, std::strin
     if (NULL == pbHashObject) {
         return false;
     }
-    status = BCryptGetProperty(hAlg, BCRYPT_HASH_LENGTH, reinterpret_cast<PBYTE>(&cbHash), sizeof(DWORD), &cbData, 0);
+    status = BCryptGetProperty(
+        hAlg,
+        BCRYPT_HASH_LENGTH,
+        reinterpret_cast<PBYTE>(&cbHash),
+        sizeof(DWORD),
+        &cbData,
+        0
+    );
     if (!NT_SUCCESS(status)) {
         return false;
     }
