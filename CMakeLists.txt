@@ -16,10 +16,10 @@ FetchContent_MakeAvailable(spdlog)
 add_executable(WinAgent agent/agent.cpp
         agent/detectionMethods/detectionMethod.cpp
         agent/detectionMethods/detectionMethod.hpp
-        agent/configFileSyner/configFile.cpp
-        agent/configFileSyner/configFile.hpp
-        agent/configFileSyner/syncer.cpp
-        agent/configFileSyner/syncer.hpp
+        agent/configFile/configFile.cpp
+        agent/configFile/configFile.hpp
+        agent/configFile/configFilelistener.cpp
+        agent/configFile/configFilelistener.hpp
         agent/commonHeaders/processInfo.hpp
         agent/detectionMethods/fsRelated/basicComparison.cpp
         agent/detectionMethods/fsRelated/basicComparison.hpp
