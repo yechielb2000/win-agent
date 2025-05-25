@@ -8,7 +8,7 @@
 struct ProcessInfo {
     std::string name;
     std::string path;
-    std::string hash256;
+    std::string sha256;
 };
 
 

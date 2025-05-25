@@ -3,15 +3,14 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
-#include <iostream>
+#include "../common/processInfo.hpp"
 
 
-std::vector<std::vector<std::string> > loadConfigFile(const std::string &filename) {
-    std::vector<std::vector<std::string> > data;
-    std::ifstream file(filename);
-    std::string line;
+std::vector<ProcessInfo> loadConfigFile(const std::string &filename) {
+    std::vector<ProcessInfo> processList;
 
-    if (file.is_open()) {
+    if (std::ifstream file(filename); file.is_open()) {
+        std::string line;
         while (std::getline(file, line)) {
             std::vector<std::string> row;
             std::stringstream ss(line);
@@ -19,12 +18,20 @@ std::vector<std::vector<std::string> > loadConfigFile(const std::string &filenam
             while (std::getline(ss, cell, ',')) {
                 row.push_back(cell);
             }
-            data.push_back(row);
+            if (row.size() == 3) {
+                ProcessInfo processInfo;
+                processInfo.name = row[0];
+                processInfo.path = row[1];
+                processInfo.sha256 = row[2];
+                processList.push_back(processInfo);
+            } else {
+                throw "Invalid row size: " + line;
+            }
         }
         file.close();
     } else {
         throw "Unable to open file: " + filename;
     }
 
-    return data;
+    return processList;
 }

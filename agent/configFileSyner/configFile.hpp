@@ -2,12 +2,12 @@
 #define CONFIGFILE_HPP
 #include <string>
 #include <vector>
-
+#include "../common/processInfo.hpp"
 
 struct configFile {
 };
 
-std::vector<std::vector<std::string> > loadConfigFile(const std::string &filename);
+std::vector<ProcessInfo> loadConfigFile(const std::string &filename);
 
 void parseConfigFileData();
 
