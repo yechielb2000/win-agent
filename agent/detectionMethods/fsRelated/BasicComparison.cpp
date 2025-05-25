@@ -16,7 +16,7 @@ void BasicComparison::runDetection() {
     }
 }
 
-bool BasicComparison::isSHA256Matched(const ProcessInfo &processInfo, std::string fileBuffer) {
+bool BasicComparison::isSHA256Matched(const ProcessInfo &processInfo, const std::string &fileBuffer) {
     BCRYPT_ALG_HANDLE hAlg;
     BCRYPT_HASH_HANDLE hHash = NULL;
     DWORD cbData = 0, cbHash = 0, cbHashObject = 0;
