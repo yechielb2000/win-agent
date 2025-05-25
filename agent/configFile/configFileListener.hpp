@@ -3,6 +3,6 @@
 #include <windows.h>
 
 
-HANDLE CreateFileChangeListener(const char *pathToWatch);
+HANDLE CreateFileChangeListener(const char *configFilePath);
 
 #endif

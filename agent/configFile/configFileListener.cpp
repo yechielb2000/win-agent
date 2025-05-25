@@ -4,9 +4,9 @@
 #include <windows.h>
 
 
-HANDLE CreateFileChangeListener(const char *pathToWatch) {
+HANDLE CreateFileChangeListener(const char *configFilePath) {
     const HANDLE changeHandle = FindFirstChangeNotificationA(
-        pathToWatch,
+        configFilePath,
         FALSE,
         FILE_NOTIFY_CHANGE_LAST_WRITE
     );
