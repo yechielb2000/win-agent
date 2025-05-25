@@ -1,7 +1,3 @@
-//
-// Created by yechi on 5/25/2025.
-//
-
 #ifndef FSDETECTIONMETHOD_HPP
 #define FSDETECTIONMETHOD_HPP
 
