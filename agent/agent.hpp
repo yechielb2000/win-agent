@@ -25,6 +25,8 @@ DWORD WINAPI WinAgentThread(LPVOID lpParam);
 
 HANDLE ConfigFileChangeListener(const char *configFilePath);
 
+DWORD WINAPI ConfigFileListenerThread(LPVOID lpParam);
+
 long updateProcessList();
 
 void updateServiceStatus(DWORD dwCurrentState, DWORD dwWin32ExitCode, DWORD dwCheckPoint);

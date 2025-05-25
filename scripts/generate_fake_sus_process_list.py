@@ -3,6 +3,8 @@ import random
 import hashlib
 import csv
 
+MAX_FILES = 200
+
 def get_sha256(filepath):
     sha256 = hashlib.sha256()
     try:
@@ -13,7 +15,7 @@ def get_sha256(filepath):
     except Exception as e:
         return None
 
-def walk_files(root="/", limit=10000):
+def walk_files(root: str ,limit: int = MAX_FILES):
     all_files = []
     for dirpath, _, filenames in os.walk(root):
         for filename in filenames:
@@ -25,7 +27,7 @@ def walk_files(root="/", limit=10000):
 
 def main():
     root_dir = "C:\\"
-    all_files = walk_files(root=root_dir, limit=10000)
+    all_files = walk_files(root=root_dir)
     random_files = random.sample(all_files, min(10, len(all_files)))
 
     results = []
@@ -37,7 +39,6 @@ def main():
 
     with open("output.csv", "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["name", "path", "sha256"])
         writer.writerows(results)
 
 

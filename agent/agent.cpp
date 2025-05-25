@@ -17,8 +17,42 @@ int main() {
     if (StartServiceCtrlDispatcher(ServiceTable) == FALSE) {
         return GetLastError();
     }
+#else
+    g_ServiceStopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+    if (g_ServiceStopEvent == NULL) {
+        return GetLastError();
+    }
+
+    // Create both threads
+    const HANDLE winAgentThreadHandle = CreateThread(
+        NULL,
+        0,
+        WinAgentThread,
+        NULL,
+        0,
+        NULL
+    );
+
+    const HANDLE fileListenerThreadHandle = CreateThread(
+        NULL,
+        0,
+        ConfigFileListenerThread,
+        NULL,
+        0,
+        NULL
+    );
+
+    if (winAgentThreadHandle && fileListenerThreadHandle) {
+        const HANDLE handles[] = {fileListenerThreadHandle, winAgentThreadHandle};
+        WaitForMultipleObjects(2, handles, TRUE, INFINITE);
+    }
+
+    // Cleanup
+    CloseHandle(g_ServiceStopEvent);
+    if (winAgentThreadHandle) CloseHandle(winAgentThreadHandle);
+    if (fileListenerThreadHandle) CloseHandle(fileListenerThreadHandle);
 #endif
-    WinAgentThread(LPVOID());
+
     return 0;
 }
 
