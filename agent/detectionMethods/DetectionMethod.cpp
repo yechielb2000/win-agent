@@ -8,5 +8,5 @@ DetectionMethod::DetectionMethod(const std::vector<ProcessInfo> &processList): p
 }
 
 void DetectionMethod::warn(const ProcessInfo &processInfo) {
-    this->logger_->warn("** Suspicious File Found {}", processInfo);
+    this->logger_->warn("** Suspicious File Found {}", processInfo.toString());
 }

@@ -9,6 +9,10 @@ struct ProcessInfo {
     std::string name;
     std::string path;
     std::string sha256;
+
+    [[nodiscard]] std::string toString() const {
+        return "name: " + name + " | " "path: " + path + " | " "sha256: " + sha256;
+    }
 };
 
 

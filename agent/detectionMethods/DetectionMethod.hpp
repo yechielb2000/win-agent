@@ -4,10 +4,8 @@
 #include <vector>
 
 #include "../commonHeaders/processInfo.hpp"
+#include "spdlog/logger.h"
 
-namespace spdlog {
-    class logger;
-}
 
 class DetectionMethod {
 protected:

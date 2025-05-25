@@ -15,8 +15,8 @@ std::shared_ptr<spdlog::logger> get_logger() {
 
 
 void setup_logger() {
-    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    auto basic_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(LOG_FILENAME);
+    const auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    const auto basic_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(LOG_FILENAME);
     std::vector<spdlog::sink_ptr> sinks{console_sink, basic_sink};
     logger = std::make_shared<spdlog::logger>("main", sinks.begin(), sinks.end());
 
