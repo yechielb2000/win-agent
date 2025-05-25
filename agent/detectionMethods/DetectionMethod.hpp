@@ -6,7 +6,7 @@
 
 class DetectionMethod {
 protected:
-    std::vector<ProcessInfo> &processList;
+    std::vector<ProcessInfo> processList;
 
 public:
     explicit DetectionMethod(const std::vector<ProcessInfo> &processList);

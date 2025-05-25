@@ -5,16 +5,16 @@
 
 void BasicComparison::runDetection() {
     for (ProcessInfo processInfo: this->processList) {
-        char fileBuffer = this->loadFile(processInfo.path);
+        std::string fileBuffer = this->loadFile(processInfo.path);
         if (isSHA256Matched(processInfo, fileBuffer)) {
             this->warn(processInfo);
         }
     }
 }
 
-bool BasicComparison::isSHA256Matched(const ProcessInfo &processInfo, char fileBuffer) {
+bool BasicComparison::isSHA256Matched(const ProcessInfo &processInfo, std::string fileBuffer) {
     /*
-    ok I found that this is a legacy and there is a newer approach using BCryptCreateHash..
+    ok, I found that this is a legacy and there is a newer approach using BCryptCreateHash..
     I will use the new one once I completed the rest. since this is also something for now.
     */
     HCRYPTPROV hProv = 0;
@@ -44,7 +44,7 @@ bool BasicComparison::isSHA256Matched(const ProcessInfo &processInfo, char fileB
         return false;
     }
 
-    result = (memcmp(hash, processInfo.sha256.data(), 32) == 0);
+    result = memcmp(hash, processInfo.sha256.data(), 32) == 0;
 
     CryptDestroyHash(hHash);
     CryptReleaseContext(hProv, 0);

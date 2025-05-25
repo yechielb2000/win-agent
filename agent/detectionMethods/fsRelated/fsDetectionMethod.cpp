@@ -2,7 +2,7 @@
 
 #include <windows.h>
 
-char fsDetectionMethod::loadFile(const std::string &filepath) {
+std::string fsDetectionMethod::loadFile(const std::string &filepath) {
     // should I do shadow copy to read it?
     char bufferToRead[MAX_PATH];
 
@@ -32,5 +32,5 @@ char fsDetectionMethod::loadFile(const std::string &filepath) {
         throw "Unable to read file: " + filepath;
     }
     CloseHandle(hFile);
-    return *bufferToRead;
+    return std::string(bufferToRead);
 }

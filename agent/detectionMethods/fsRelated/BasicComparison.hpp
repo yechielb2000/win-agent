@@ -6,9 +6,9 @@
 
 class BasicComparison : public fsDetectionMethod {
 public:
-    explicit BasicComparison(const std::vector<ProcessInfo> &processList);
+    using fsDetectionMethod::fsDetectionMethod;
 
-    bool isSHA256Matched(const ProcessInfo &processInfo, char fileBuffer);
+    bool isSHA256Matched(const ProcessInfo &processInfo, std::string fileBuffer);
 
     void runDetection();
 };

@@ -1,13 +1,13 @@
 #ifndef FSDETECTIONMETHOD_HPP
 #define FSDETECTIONMETHOD_HPP
 
-#include <bemapiset.h>
-
-#include "../DetectionMethod.hpp""
+#include "../DetectionMethod.hpp"
 
 class fsDetectionMethod : public DetectionMethod {
 public:
-    static char loadFile(const std::string &filepath);
+    using DetectionMethod::DetectionMethod;
+
+    static std::string loadFile(const std::string &filepath);
 };
 
 

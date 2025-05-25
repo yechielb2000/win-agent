@@ -3,9 +3,11 @@
 #include <vector>
 #include "commonHeaders/processInfo.hpp"
 #include "configFileSyner/configFile.hpp"
+#include "detectionMethods/fsRelated/BasicComparison.hpp"
 
 int main() {
-    auto t = loadConfigFile("..\\tests\\output.csv");
-    1==1;
+    const std::vector<ProcessInfo> processInfos = loadConfigFile("..\\tests\\output.csv");
+    auto bc = BasicComparison(processInfos);
+    bc.runDetection();
     return 0;
 }

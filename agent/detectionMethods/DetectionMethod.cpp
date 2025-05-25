@@ -1,6 +1,6 @@
 #include "DetectionMethod.hpp"
 
-DetectionMethod::DetectionMethod(const std::vector<ProcessInfo> &processList): processList() {
+DetectionMethod::DetectionMethod(const std::vector<ProcessInfo> &processList): processList(processList) {
     this->processList = processList;
 }
 
