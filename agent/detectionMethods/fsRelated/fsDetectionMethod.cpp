@@ -3,9 +3,6 @@
 #include <windows.h>
 
 std::string fsDetectionMethod::loadFile(const std::string &filepath) {
-    // TODO: bufferToRead not contains all buffer of the file.
-    char bufferToRead[MAX_PATH];
-
     const HANDLE hFile = CreateFile(
         filepath.c_str(),
         GENERIC_READ,
@@ -16,15 +13,22 @@ std::string fsDetectionMethod::loadFile(const std::string &filepath) {
         NULL
     );
 
+
     if (hFile == INVALID_HANDLE_VALUE) {
         throw "Unable to open file: " + filepath;
     }
 
-    BOOL readResult = ReadFile(
+    LARGE_INTEGER fileSize;
+    GetFileSizeEx(hFile, &fileSize);
+
+    std::vector<char> fileBuffer(fileSize.QuadPart);
+    DWORD bytesRead;
+
+    const BOOL readResult = ReadFile(
         hFile,
-        bufferToRead,
-        sizeof(bufferToRead),
-        0,
+        fileBuffer.data(),
+        fileSize.QuadPart,
+        &bytesRead,
         NULL
     );
 
@@ -32,5 +36,5 @@ std::string fsDetectionMethod::loadFile(const std::string &filepath) {
         throw "Unable to read file: " + filepath;
     }
     CloseHandle(hFile);
-    return std::string(bufferToRead);
+    return std::string(fileBuffer.data(), bytesRead);
 }
