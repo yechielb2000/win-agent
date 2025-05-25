@@ -1,7 +1,11 @@
 #include <windows.h>
-#include <wincrypt.h>
+#include <bcrypt.h>
+#include <sstream>
+#include <iomanip>
 #include "basicComparison.hpp"
 
+
+#define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
 
 void BasicComparison::runDetection() {
     for (ProcessInfo processInfo: this->processList) {
@@ -13,41 +17,53 @@ void BasicComparison::runDetection() {
 }
 
 bool BasicComparison::isSHA256Matched(const ProcessInfo &processInfo, std::string fileBuffer) {
-    /*
-    ok, I found that this is a legacy and there is a newer approach using BCryptCreateHash..
-    I will use the new one once I completed the rest. since this is also something for now.
-    */
-    HCRYPTPROV hProv = 0;
-    HCRYPTHASH hHash = 0;
-    BYTE hash[32];
-    DWORD hashLen = 32;
-    BOOL result = FALSE;
+    BCRYPT_ALG_HANDLE hAlg;
+    BCRYPT_HASH_HANDLE hHash = NULL;
+    DWORD cbData = 0, cbHash = 0, cbHashObject = 0;
+    PBYTE pbHashObject = NULL, pbHash = NULL;
 
-    if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_AES, CRYPT_VERIFYCONTEXT)) {
+    NTSTATUS status = BCryptOpenAlgorithmProvider(&hAlg, BCRYPT_SHA256_ALGORITHM, NULL, 0);
+    if (!NT_SUCCESS(status)) {
+        return false;
+    }
+    status = BCryptGetProperty(hAlg, BCRYPT_OBJECT_LENGTH, reinterpret_cast<PBYTE>(&cbHashObject), sizeof(DWORD),
+                               &cbData, 0);
+    if (!NT_SUCCESS(status)) {
+        return false;
+    }
+    pbHashObject = static_cast<PBYTE>(HeapAlloc(GetProcessHeap(), 0, cbHashObject));
+    if (NULL == pbHashObject) {
+        return false;
+    }
+    status = BCryptGetProperty(hAlg, BCRYPT_HASH_LENGTH, reinterpret_cast<PBYTE>(&cbHash), sizeof(DWORD), &cbData, 0);
+    if (!NT_SUCCESS(status)) {
+        return false;
+    }
+    pbHash = static_cast<PBYTE>(HeapAlloc(GetProcessHeap(), 0, cbHash));
+    if (NULL == pbHash) {
         return false;
     }
 
-    if (!CryptCreateHash(hProv, CALG_SHA_256, 0, 0, &hHash)) {
-        CryptReleaseContext(hProv, 0);
+    status = BCryptCreateHash(hAlg, &hHash, pbHashObject, cbHashObject, NULL, 0, 0);
+    if (!NT_SUCCESS(status)) {
         return false;
     }
 
-    if (!CryptHashData(hHash, reinterpret_cast<BYTE *>(&fileBuffer), sizeof(fileBuffer), 0)) {
-        CryptDestroyHash(hHash);
-        CryptReleaseContext(hProv, 0);
+    status = BCryptHashData(hHash, const_cast<PUCHAR>(reinterpret_cast<const BYTE *>(fileBuffer.c_str())),
+                            fileBuffer.size(), 0);
+    if (!NT_SUCCESS(status)) {
         return false;
     }
 
-    if (!CryptGetHashParam(hHash, HP_HASHVAL, hash, &hashLen, 0)) {
-        CryptDestroyHash(hHash);
-        CryptReleaseContext(hProv, 0);
+    status = BCryptFinishHash(hHash, pbHash, cbHash, 0);
+    if (!NT_SUCCESS(status)) {
         return false;
     }
 
-    result = memcmp(hash, processInfo.sha256.data(), 32) == 0;
-
-    CryptDestroyHash(hHash);
-    CryptReleaseContext(hProv, 0);
-
-    return result;
+    BCryptCloseAlgorithmProvider(hAlg, 0);
+    std::stringstream hashStream;
+    for (DWORD i = 0; i < cbHash; i++) {
+        hashStream << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(pbHash[i]);
+    }
+    return hashStream.str() == processInfo.sha256;
 }

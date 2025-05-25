@@ -3,7 +3,7 @@
 #include <windows.h>
 
 std::string fsDetectionMethod::loadFile(const std::string &filepath) {
-    // should I do shadow copy to read it?
+    // TODO: bufferToRead not contains all buffer of the file.
     char bufferToRead[MAX_PATH];
 
     const HANDLE hFile = CreateFile(
