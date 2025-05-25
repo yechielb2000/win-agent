@@ -4,9 +4,10 @@
 #include <vector>
 #include <sstream>
 #include "../commonHeaders/processInfo.hpp"
+#include "../logger/logger.hpp"
 
-// TODO: maybe split to load file and parse file.
 std::vector<ProcessInfo> loadConfigFile(const std::string &filename) {
+    auto logger = get_logger();
     std::vector<ProcessInfo> processList;
 
     if (std::ifstream file(filename); file.is_open()) {
@@ -25,12 +26,12 @@ std::vector<ProcessInfo> loadConfigFile(const std::string &filename) {
                 processInfo.sha256 = row[2];
                 processList.push_back(processInfo);
             } else {
-                throw "Invalid row size: " + line;
+                logger->error("Invalid row size: " + line);
             }
         }
         file.close();
     } else {
-        throw "Unable to open file: " + filename;
+        logger->error("Unable to open file: " + filename);
     }
 
     return processList;

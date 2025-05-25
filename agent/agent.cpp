@@ -1,21 +1,11 @@
 #include <iostream>
 #include <windows.h>
 #include <vector>
-#include "commonHeaders/processInfo.hpp"
+#include <mutex>
 #include "configFile/configFile.hpp"
 #include "detectionMethods/fsRelated/BasicComparison.hpp"
 #include "logger/logger.hpp"
-
-SERVICE_STATUS g_ServiceStatus = {0};
-SERVICE_STATUS_HANDLE g_StatusHandle = NULL;
-HANDLE g_ServiceStopEvent = INVALID_HANDLE_VALUE;
-constexpr char SERVICE_NAME[] = "WinAgent";
-
-VOID WINAPI WinAgentService(DWORD argc, LPTSTR *argv);
-
-VOID WINAPI ServiceCtrlHandler(DWORD);
-
-DWORD WINAPI ServiceWorkerThread(LPVOID lpParam);
+#include "agent.hpp"
 
 
 int main() {
@@ -28,23 +18,61 @@ int main() {
         return GetLastError();
     }
 #endif
-    ServiceWorkerThread(LPVOID());
+    WinAgentThread(LPVOID());
     return 0;
 }
 
-DWORD ServiceWorkerThread(LPVOID lpParam) {
+DWORD WinAgentThread(LPVOID lpParam) {
     try {
         setup_logger();
     } catch (const std::exception &e) {
         OutputDebugStringA("Failed to load logger");
         return ERROR_LOG_CLIENT_NOT_REGISTERED;
     }
+
+    updateProcessList();
+
     while (WaitForSingleObject(g_ServiceStopEvent, 0) != WAIT_OBJECT_0) {
-        const std::vector<ProcessInfo> processInfos = loadConfigFile("..\\tests\\output.csv");
-        auto bc = BasicComparison(processInfos);
+        auto bc = BasicComparison(g_ProcessInfos);
         bc.runDetection();
     }
     return ERROR_SUCCESS;
+}
+
+DWORD WINAPI ConfigFileListenerThread(LPVOID lpParam) {
+    const HANDLE changeHandle = ConfigFileChangeListener(CONFIG_FILE_PATH.c_str());
+
+    while (WaitForSingleObject(g_ServiceStopEvent, 0) != WAIT_OBJECT_0) {
+        if (WaitForSingleObject(changeHandle, 1000) == WAIT_OBJECT_0) {
+            try {
+                updateProcessList();
+
+                if (!FindNextChangeNotification(changeHandle)) {
+                    OutputDebugStringA("Failed to reset change notification");
+                    break;
+                }
+            } catch ([[maybe_unused]] const std::exception &e) {
+                OutputDebugStringA("Failed to process file change");
+            }
+        }
+    }
+
+    FindCloseChangeNotification(changeHandle);
+    return ERROR_SUCCESS;
+}
+
+
+HANDLE ConfigFileChangeListener(const char *configFilePath) {
+    const HANDLE changeHandle = FindFirstChangeNotificationA(
+        configFilePath,
+        FALSE,
+        FILE_NOTIFY_CHANGE_LAST_WRITE
+    );
+
+    if (changeHandle == INVALID_HANDLE_VALUE) {
+        throw std::runtime_error("Failed to create file change notification handle");
+    }
+    return changeHandle;
 }
 
 
@@ -89,16 +117,32 @@ VOID WINAPI WinAgentService(DWORD argc, LPTSTR *argv) {
         return;
     }
 
-    const HANDLE winApiServiceThreadHandle = CreateThread(
+    const HANDLE winAgentThreadHandle = CreateThread(
         NULL,
         0,
-        ServiceWorkerThread,
+        WinAgentThread,
         NULL,
         0,
         NULL
     );
-    WaitForSingleObject(winApiServiceThreadHandle, INFINITE);
 
+    const HANDLE fileListenerThreadHandle = CreateThread(
+        NULL,
+        0,
+        ConfigFileListenerThread,
+        NULL,
+        0,
+        NULL
+    );
+
+    const HANDLE handles[] = {fileListenerThreadHandle, winAgentThreadHandle};
+
+    WaitForSingleObject(winAgentThreadHandle, INFINITE);
+    WaitForMultipleObjects(2, handles, TRUE, INFINITE);
+
+    CloseHandle(g_ServiceStopEvent);
+    CloseHandle(winAgentThreadHandle);
+    CloseHandle(fileListenerThreadHandle);
     CloseHandle(g_ServiceStopEvent);
 
     g_ServiceStatus.dwControlsAccepted = 0;
@@ -133,4 +177,17 @@ VOID WINAPI ServiceCtrlHandler(const DWORD ctrlCode) {
         default:
             break;
     }
+}
+
+
+long updateProcessList() {
+    try {
+        auto processList = loadConfigFile(CONFIG_FILE_PATH);
+        std::lock_guard lock(g_ProcessInfosMutex);
+        g_ProcessInfos = std::move(processList);
+    } catch ([[maybe_unused]] const std::exception &e) {
+        OutputDebugStringA("Failed initial config load");
+        return ERROR_FILE_NOT_FOUND;
+    }
+    return 0;
 }

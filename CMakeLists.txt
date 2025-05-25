@@ -13,13 +13,13 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(spdlog)
 
-add_executable(WinAgent agent/agent.cpp
+add_executable(WinAgent
+        agent/agent.cpp
+        agent/agent.hpp
         agent/detectionMethods/detectionMethod.cpp
         agent/detectionMethods/detectionMethod.hpp
         agent/configFile/configFile.cpp
         agent/configFile/configFile.hpp
-        agent/configFile/configFilelistener.cpp
-        agent/configFile/configFilelistener.hpp
         agent/commonHeaders/processInfo.hpp
         agent/detectionMethods/fsRelated/basicComparison.cpp
         agent/detectionMethods/fsRelated/basicComparison.hpp
