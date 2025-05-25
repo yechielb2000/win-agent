@@ -9,7 +9,5 @@ struct configFile {
 
 std::vector<ProcessInfo> loadConfigFile(const std::string &filename);
 
-void parseConfigFileData();
-
 
 #endif
