@@ -7,7 +7,7 @@
 
 class fsDetectionMethod : DetectionMethod {
 public:
-    static HANDLE loadFile(const std::string &filepath);
+    static char loadFile(const std::string &filepath);
 };
 
 
