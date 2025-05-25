@@ -11,6 +11,8 @@ public:
     DetectionMethod();
 
     explicit DetectionMethod(std::vector<ProcessInfo> &processList);
+
+    void warn(const ProcessInfo &processInfo);
 };
 
 

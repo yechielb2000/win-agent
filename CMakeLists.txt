@@ -11,4 +11,7 @@ add_executable(WinAgent agent/agent.cpp
         agent/configFileSyner/syncer.cpp
         agent/configFileSyner/syncer.hpp
         agent/common/processInfo.hpp
+        agent/detectionMethods/fsRelated/basicComparison.cpp
+        agent/detectionMethods/fsRelated/basicComparison.hpp
+        agent/detectionMethods/fsRelated/walk.cpp
 )
