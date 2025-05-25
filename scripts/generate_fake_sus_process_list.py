@@ -1,9 +1,10 @@
+import csv
+import hashlib
 import os
 import random
-import hashlib
-import csv
 
 MAX_FILES = 200
+
 
 def get_sha256(filepath):
     sha256 = hashlib.sha256()
@@ -15,7 +16,8 @@ def get_sha256(filepath):
     except Exception as e:
         return None
 
-def walk_files(root: str ,limit: int = MAX_FILES):
+
+def walk_files(root: str, limit: int = MAX_FILES):
     all_files = []
     for dirpath, _, filenames in os.walk(root):
         for filename in filenames:
@@ -24,6 +26,7 @@ def walk_files(root: str ,limit: int = MAX_FILES):
             if len(all_files) >= limit:
                 return all_files
     return all_files
+
 
 def main():
     root_dir = "C:\\"

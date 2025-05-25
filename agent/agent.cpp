@@ -7,9 +7,10 @@
 #include "logger/logger.hpp"
 #include "agent.hpp"
 
+const std::string CONFIG_FILE_PATH = GetConfigFilePath();
+
 
 int main() {
-#if DEBUG
     constexpr SERVICE_TABLE_ENTRY ServiceTable[] = {
         {const_cast<LPSTR>(SERVICE_NAME), static_cast<LPSERVICE_MAIN_FUNCTION>(WinAgentService)},
         {NULL, NULL}
@@ -17,41 +18,6 @@ int main() {
     if (StartServiceCtrlDispatcher(ServiceTable) == FALSE) {
         return GetLastError();
     }
-#else
-    g_ServiceStopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-    if (g_ServiceStopEvent == NULL) {
-        return GetLastError();
-    }
-
-    // Create both threads
-    const HANDLE winAgentThreadHandle = CreateThread(
-        NULL,
-        0,
-        WinAgentThread,
-        NULL,
-        0,
-        NULL
-    );
-
-    const HANDLE fileListenerThreadHandle = CreateThread(
-        NULL,
-        0,
-        ConfigFileListenerThread,
-        NULL,
-        0,
-        NULL
-    );
-
-    if (winAgentThreadHandle && fileListenerThreadHandle) {
-        const HANDLE handles[] = {fileListenerThreadHandle, winAgentThreadHandle};
-        WaitForMultipleObjects(2, handles, TRUE, INFINITE);
-    }
-
-    // Cleanup
-    CloseHandle(g_ServiceStopEvent);
-    if (winAgentThreadHandle) CloseHandle(winAgentThreadHandle);
-    if (fileListenerThreadHandle) CloseHandle(fileListenerThreadHandle);
-#endif
 
     return 0;
 }
@@ -74,19 +40,29 @@ DWORD WinAgentThread(LPVOID lpParam) {
 }
 
 DWORD WINAPI ConfigFileListenerThread(LPVOID lpParam) {
-    const HANDLE changeHandle = ConfigFileChangeListener(CONFIG_FILE_PATH.c_str());
+    HANDLE changeHandle = NULL;
+
+    changeHandle = ConfigFileChangeListener(reinterpret_cast<const char *>(CONFIG_FILE_PATH.c_str()));
 
     while (WaitForSingleObject(g_ServiceStopEvent, 0) != WAIT_OBJECT_0) {
-        if (WaitForSingleObject(changeHandle, 1000) == WAIT_OBJECT_0) {
+        const DWORD waitStatus = WaitForSingleObject(changeHandle, 1000);
+
+        if (waitStatus == WAIT_FAILED) {
+            OutputDebugStringA("Wait failed on change notification handle");
+            break;
+        }
+
+        if (waitStatus == WAIT_OBJECT_0) {
             try {
                 updateProcessList();
-
                 if (!FindNextChangeNotification(changeHandle)) {
                     OutputDebugStringA("Failed to reset change notification");
                     break;
                 }
-            } catch ([[maybe_unused]] const std::exception &e) {
-                OutputDebugStringA("Failed to process file change");
+            } catch (const std::exception &e) {
+                char errorMsg[256];
+                sprintf_s(errorMsg, "Error processing file change: %s", e.what());
+                OutputDebugStringA(errorMsg);
             }
         }
     }
@@ -97,13 +73,19 @@ DWORD WINAPI ConfigFileListenerThread(LPVOID lpParam) {
 
 
 HANDLE ConfigFileChangeListener(const char *configFilePath) {
+    auto directoryPath = std::string(configFilePath);
+    const size_t lastSlash = directoryPath.find_last_of("\\/");
+    if (lastSlash != std::string::npos) {
+        directoryPath = directoryPath.substr(0, lastSlash + 1);
+    }
+
     const HANDLE changeHandle = FindFirstChangeNotificationA(
-        configFilePath,
+        directoryPath.c_str(),
         FALSE,
         FILE_NOTIFY_CHANGE_LAST_WRITE
     );
 
-    if (changeHandle == INVALID_HANDLE_VALUE) {
+    if (changeHandle == INVALID_HANDLE_VALUE || changeHandle == NULL) {
         throw std::runtime_error("Failed to create file change notification handle");
     }
     return changeHandle;
@@ -190,16 +172,10 @@ VOID WINAPI ServiceCtrlHandler(const DWORD ctrlCode) {
 }
 
 
-long updateProcessList() {
-    try {
-        auto processList = loadConfigFile(CONFIG_FILE_PATH);
-        std::lock_guard lock(g_ProcessInfosMutex);
-        g_ProcessInfos = std::move(processList);
-    } catch ([[maybe_unused]] const std::exception &e) {
-        OutputDebugStringA("Failed initial config load");
-        return ERROR_FILE_NOT_FOUND;
-    }
-    return 0;
+void updateProcessList() {
+    auto processList = loadConfigFile(CONFIG_FILE_PATH);
+    std::lock_guard lock(g_ProcessInfosMutex);
+    g_ProcessInfos = std::move(processList);
 }
 
 void updateServiceStatus(const DWORD dwCurrentState, const DWORD dwWin32ExitCode, const DWORD dwCheckPoint) {

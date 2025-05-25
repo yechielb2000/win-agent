@@ -13,7 +13,7 @@ inline SERVICE_STATUS_HANDLE g_StatusHandle = NULL;
 inline auto g_ServiceStopEvent = INVALID_HANDLE_VALUE;
 constexpr char SERVICE_NAME[] = "WinAgent";
 
-inline std::string CONFIG_FILE_PATH = "..\\scripts\\output.csv";
+
 inline std::vector<ProcessInfo> g_ProcessInfos;
 inline std::mutex g_ProcessInfosMutex;
 
@@ -27,7 +27,7 @@ HANDLE ConfigFileChangeListener(const char *configFilePath);
 
 DWORD WINAPI ConfigFileListenerThread(LPVOID lpParam);
 
-long updateProcessList();
+void updateProcessList();
 
 void updateServiceStatus(DWORD dwCurrentState, DWORD dwWin32ExitCode, DWORD dwCheckPoint);
 
