@@ -5,7 +5,7 @@
 
 #include "../DetectionMethod.hpp""
 
-class fsDetectionMethod : DetectionMethod {
+class fsDetectionMethod : public DetectionMethod {
 public:
     static char loadFile(const std::string &filepath);
 };

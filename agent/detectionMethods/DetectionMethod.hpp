@@ -5,6 +5,7 @@
 #include "../commonHeaders/processInfo.hpp"
 
 class DetectionMethod {
+protected:
     std::vector<ProcessInfo> &processList;
 
 public:
